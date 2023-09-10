@@ -67,7 +67,7 @@ class _StartScreenState extends State<StartScreen> {
         children: [
           Container(
             padding: const EdgeInsets.only(
-                top: 40.0, left: 40.0, right: 40.0, bottom: 30.0),
+                top: 40.0, left: 40.0, right: 40.0, bottom: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -126,7 +126,7 @@ class _StartScreenState extends State<StartScreen> {
                       return Column(
                         children: [
                           const SizedBox(
-                            height: 7.0,
+                            height: 4.0,
                           ),
                           elementTransaction(
                               _transactions[index].title,
