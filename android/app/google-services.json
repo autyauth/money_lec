@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "437317535645",
+    "firebase_url": "https://moneylecdb-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "moneylecdb",
+    "storage_bucket": "moneylecdb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437317535645:android:901ab5335c4e900e3f9174",
+        "android_client_info": {
+          "package_name": "com.example.money_lec"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcuSiGnHaFGg1VOh2LuARGWjPeYtdB6Nc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
