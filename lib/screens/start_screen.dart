@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:money_lec/db/transactions_database.dart';
-import 'package:money_lec/model/transaction.dart';
+import 'package:money_lec/model/transactions.dart';
 import 'package:money_lec/screens/new_transaction_screen.dart';
 
 class StartScreen extends StatefulWidget {

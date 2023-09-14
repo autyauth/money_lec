@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:money_lec/db/transactions_database.dart';
-import 'package:money_lec/model/transaction.dart';
+import 'package:money_lec/model/transactions.dart';
 import 'package:money_lec/widgets/new_transaction/button_confirm.dart';
 import 'package:money_lec/widgets/new_transaction/button_date.dart';
 import 'package:money_lec/widgets/new_transaction/button_isExpense.dart';

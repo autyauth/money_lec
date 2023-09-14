@@ -1,4 +1,4 @@
-import 'package:money_lec/model/transaction.dart';
+import 'package:money_lec/model/transactions.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
