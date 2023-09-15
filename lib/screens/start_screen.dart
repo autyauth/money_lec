@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:money_lec/db/transactions_database.dart';
 import 'package:money_lec/model/transactions.dart';
+import 'package:money_lec/screens/login_screen.dart';
 import 'package:money_lec/screens/new_transaction_screen.dart';
+import 'package:money_lec/services/transaction_firestore_service.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -14,12 +17,13 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   late List<Transactions> _transactions = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  User user = FirebaseAuth.instance.currentUser!;
   double _totalMoney = 0;
 
   @override
   void initState() {
     super.initState();
+
     _refreshTransaction();
   }
 
@@ -31,16 +35,19 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   Future<void> _refreshTransaction() async {
-    final transactions =
-        await TransactionsDatabase.instance.readAllTransactions();
-    final totalMoney = _getTotalMoney();
-    setState(() {
-      _transactions = transactions;
-      _totalMoney = totalMoney;
+    final transactionsStream =
+        TransactionFirestoreService().getTransactionsByUser();
+
+    transactionsStream.listen((List<Transactions> transactions) {
+      final totalMoney = _getTotalMoney(transactions);
+      setState(() {
+        _transactions = transactions;
+        _totalMoney = totalMoney;
+      });
     });
   }
 
-  double _getTotalMoney() {
+  double _getTotalMoney(List<Transactions> transactions) {
     double totalMoney = 0;
     for (int i = 0; i < _transactions.length; i++) {
       if (_transactions[i].isExpense) {
@@ -54,14 +61,30 @@ class _StartScreenState extends State<StartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = Theme.of(context).primaryColor;
     _refreshTransaction();
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0XFFFF69B4),
-      // appBar: AppBar(
-      //   elevation: 0,
-      //   backgroundColor: const Color(0XFFFF69B4),
-      // ),
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app), // Sign-out icon
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut(); // Sign out the user
+              Navigator.pushReplacement(
+                // Navigate to the login screen
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LoginScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -161,6 +184,7 @@ class _StartScreenState extends State<StartScreen> {
                 ),
                 child: NewTransactionsScreen(
                   onRefresh: _refreshTransaction,
+                  userEmail: user.email!,
                 ),
               );
             },

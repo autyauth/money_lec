@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:money_lec/db/transactions_database.dart';
 import 'package:money_lec/model/transactions.dart';
+import 'package:money_lec/services/transaction_firestore_service.dart';
 import 'package:money_lec/widgets/new_transaction/button_confirm.dart';
 import 'package:money_lec/widgets/new_transaction/button_date.dart';
 import 'package:money_lec/widgets/new_transaction/button_isExpense.dart';
 
 class NewTransactionsScreen extends StatefulWidget {
-  const NewTransactionsScreen({super.key, required this.onRefresh});
+  const NewTransactionsScreen(
+      {super.key, required this.onRefresh, required this.userEmail});
   final Function() onRefresh;
+  final String userEmail;
   @override
   State<NewTransactionsScreen> createState() => _NewTransactionsScreenState();
 }
@@ -98,7 +100,7 @@ class _NewTransactionsScreenState extends State<NewTransactionsScreen> {
               width: 10.0,
             ),
             ButtonConfirm(canConfirm: (ok) async {
-              await addTransaction();
+              await addTransaction(widget.userEmail);
               widget.onRefresh();
             })
           ],
@@ -107,7 +109,7 @@ class _NewTransactionsScreenState extends State<NewTransactionsScreen> {
     );
   }
 
-  Future<void> addTransaction() async {
+  Future<void> addTransaction(String email) async {
     try {
       final Transactions newTransaction = Transactions(
         title: _title.text,
@@ -115,7 +117,7 @@ class _NewTransactionsScreenState extends State<NewTransactionsScreen> {
         date: _selectedDate,
         isExpense: _isExpense,
       );
-      await TransactionsDatabase.instance.create(newTransaction);
+      await TransactionFirestoreService().addTransaction(newTransaction);
     } catch (e) {
       // Handle any exceptions that may occur during database operations.
       // ignore: avoid_print

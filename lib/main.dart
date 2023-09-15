@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:money_lec/firebase_options.dart';
-import 'package:money_lec/screens/start_screen.dart';
+import 'package:money_lec/screens/login_screen.dart';
 import 'package:money_lec/theme/theme.dart';
 import 'package:money_lec/theme/theme_manager.dart';
 
@@ -10,6 +10,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const MyApp());
 }
 
@@ -47,7 +48,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      home: StartScreen(),
+      home: LoginScreen(),
       themeMode: themeManager.themeMode,
       theme: AppTheme.lightTheme,
     );

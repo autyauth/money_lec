@@ -4,7 +4,7 @@ import 'package:money_lec/theme/pallete.dart';
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: Pallete.whiteColor,
+    primaryColor: Pallete.pinkColor,
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: Pallete.whiteColor,
     ),
