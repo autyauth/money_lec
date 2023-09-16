@@ -8,7 +8,7 @@ import 'package:money_lec/screens/new_transaction_screen.dart';
 import 'package:money_lec/services/transaction_firestore_service.dart';
 
 class StartScreen extends StatefulWidget {
-  const StartScreen({super.key});
+  const StartScreen({Key? key});
 
   @override
   State<StartScreen> createState() => _StartScreenState();
@@ -19,6 +19,7 @@ class _StartScreenState extends State<StartScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   User user = FirebaseAuth.instance.currentUser!;
   double _totalMoney = 0;
+  DateTime? _selectedDate; // เพิ่มตัวแปรสำหรับเก็บวันที่ที่ถูกเลือก
 
   @override
   void initState() {
@@ -49,11 +50,11 @@ class _StartScreenState extends State<StartScreen> {
 
   double _getTotalMoney(List<Transactions> transactions) {
     double totalMoney = 0;
-    for (int i = 0; i < _transactions.length; i++) {
-      if (_transactions[i].isExpense) {
-        totalMoney -= _transactions[i].amount;
+    for (int i = 0; i < transactions.length; i++) {
+      if (transactions[i].isExpense) {
+        totalMoney -= transactions[i].amount;
       } else {
-        totalMoney += _transactions[i].amount;
+        totalMoney += transactions[i].amount;
       }
     }
     return totalMoney;
@@ -71,11 +72,10 @@ class _StartScreenState extends State<StartScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app), // Sign-out icon
+            icon: Icon(Icons.exit_to_app),
             onPressed: () async {
-              await FirebaseAuth.instance.signOut(); // Sign out the user
+              await FirebaseAuth.instance.signOut();
               Navigator.pushReplacement(
-                // Navigate to the login screen
                 context,
                 MaterialPageRoute(
                   builder: (context) => LoginScreen(),
@@ -128,6 +128,35 @@ class _StartScreenState extends State<StartScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: DropdownButton<DateTime>(
+                    value: _selectedDate,
+                    items: [
+                      DropdownMenuItem<DateTime>(
+                        value: null,
+                        child: Text('ทั้งหมด'),
+                      ),
+                      ..._transactions
+                          .map((transaction) => transaction.date)
+                          .toSet()
+                          .toList()
+                          .map(
+                            (date) => DropdownMenuItem<DateTime>(
+                              value: date,
+                              child: Text(DateFormat.yMd().format(date)),
+                            ),
+                          )
+                          .toList(),
+                    ],
+                    onChanged: (selectedDate) {
+                      setState(() {
+                        _selectedDate = selectedDate;
+                      });
+                    },
+                    hint: Text('เลือกวันที่'),
+                  ),
+                ),
               ],
             ),
           ),
@@ -145,24 +174,30 @@ class _StartScreenState extends State<StartScreen> {
               child: ListView.builder(
                   itemCount: _transactions.length,
                   itemBuilder: (context, index) {
-                    if (_transactions.isNotEmpty) {
+                    final transaction = _transactions[index];
+                    if (_selectedDate == null ||
+                        transaction.date == _selectedDate) {
                       return Column(
                         children: [
                           const SizedBox(
                             height: 4.0,
                           ),
-                          elementTransaction(
-                              _transactions[index].title,
-                              _transactions[index].amount,
-                              _transactions[index].date,
-                              _transactions[index].isExpense),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: elementTransaction(
+                              transaction.title,
+                              transaction.amount,
+                              transaction.date,
+                              transaction.isExpense,
+                            ),
+                          ),
                           const SizedBox(
                             height: 3.0,
                           ),
                         ],
                       );
                     }
-                    return null;
+                    return const SizedBox.shrink();
                   }),
             ),
           ),
@@ -219,29 +254,48 @@ class _StartScreenState extends State<StartScreen> {
     } else {
       isExpense0 = 'รายรับ';
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(44, 255, 105, 180),
-            borderRadius: BorderRadius.circular(10),
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(44, 255, 105, 180),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      height: 60,
+      width: 270,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(44, 255, 105, 180),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(Icons.money, size: 30),
           ),
-          child: const Icon(Icons.money, size: 30),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              Text(DateFormat.yMd().format(date)),
-              Text(isExpense0),
-              Text(title),
-            ],
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(DateFormat.yMd().format(date)),
+                Text(isExpense0),
+                Text(title),
+              ],
+            ),
           ),
-        ),
-        Text(amount.toString()),
-      ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              amount.toString(),
+            ),
+          ),
+          const SizedBox(
+            width: 15,
+          ),
+        ],
+      ),
     );
   }
 }

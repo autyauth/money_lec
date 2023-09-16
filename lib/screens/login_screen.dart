@@ -4,6 +4,8 @@ import 'package:money_lec/screens/start_screen.dart';
 import 'package:money_lec/services/sign_in_service.dart';
 
 class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,13 +19,13 @@ class LoginScreen extends StatelessWidget {
             if (user != null) {
               // User is authenticated, navigate to StartScreen
 
-              return StartScreen();
+              return const StartScreen();
             }
 
-            return LoginForm(); // Show the login form
+            return const LoginForm(); // Show the login form
           } else {
             // Handle other connection states (loading, etc.) if needed
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -32,6 +34,8 @@ class LoginScreen extends StatelessWidget {
 }
 
 class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
+
   @override
   _LoginFormState createState() => _LoginFormState();
 }
@@ -74,7 +78,7 @@ class _LoginFormState extends State<LoginForm> {
                 width: 300,
                 height: 200,
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(44, 158, 158, 158),
+                  color: const Color.fromARGB(44, 158, 158, 158),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Form(
