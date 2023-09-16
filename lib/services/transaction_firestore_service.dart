@@ -15,7 +15,6 @@ class TransactionFirestoreService {
           .collection('transactions')
           .add(transaction.toJson());
     } catch (e) {
-      print('Error adding transaction: $e');
       // Handle the error as needed
     }
   }

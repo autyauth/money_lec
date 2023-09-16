@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:money_lec/model/transactions.dart';
 import 'package:money_lec/widgets/transactions/transaction_widget.dart';
 
-class IncomePage extends StatelessWidget {
+class IsExpensePage extends StatelessWidget {
   final List<Transactions> transactions; // รายการรายรับ
 
-  IncomePage({required this.transactions});
+  const IsExpensePage({super.key, required this.transactions});
   bool isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
         date1.month == date2.month &&
@@ -31,7 +31,7 @@ class IncomePage extends StatelessWidget {
                 ),
                 child: Text(
                   DateFormat.yMd().format(transactions[index].date),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                   ),
@@ -40,7 +40,7 @@ class IncomePage extends StatelessWidget {
             TransactionWidget(
               transaction: transactions[index],
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             )
           ],

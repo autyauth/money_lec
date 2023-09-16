@@ -1,13 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:money_lec/model/transactions.dart';
+import 'package:money_lec/page/all_transaction_page.dart';
+import 'package:money_lec/page/income_page.dart';
+import 'package:money_lec/page/isExpense_page.dart';
 import 'package:money_lec/screens/login_screen.dart';
 import 'package:money_lec/screens/new_transaction_screen.dart';
 import 'package:money_lec/services/transaction_firestore_service.dart';
 
 class StartScreen extends StatefulWidget {
-  const StartScreen({Key? key});
+  const StartScreen({super.key});
 
   @override
   State<StartScreen> createState() => _StartScreenState();
@@ -20,7 +22,7 @@ class _StartScreenState extends State<StartScreen> {
   double _totalMoney = 0;
   //final List<Widget> _page = [AllTransactionPage(transactions: transactions),IncomePage(transactions: transactions),IsExpensePage(transactions: transactions)];
   int _currentIndex = 0;
-
+  List<Widget> _page = [];
   @override
   void initState() {
     super.initState();
@@ -42,6 +44,11 @@ class _StartScreenState extends State<StartScreen> {
       setState(() {
         _transactions = transactions;
         _totalMoney = totalMoney;
+        _page = [
+          AllTransactionPage(transactions: transactions),
+          IncomePage(transactions: _getIncomeTransactions()),
+          IsExpensePage(transactions: _getExpenseTransactions())
+        ];
       });
     });
   }
@@ -76,13 +83,14 @@ class _StartScreenState extends State<StartScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
+              // ignore: use_build_context_synchronously
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => LoginScreen(),
+                  builder: (context) => const LoginScreen(),
                 ),
               );
             },
@@ -146,40 +154,9 @@ class _StartScreenState extends State<StartScreen> {
                   topRight: Radius.circular(30.0),
                 ),
               ),
-              child: ListView.builder(
-                itemCount: _transactions.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (index == 0 ||
-                          !isSameDay(_transactions[index - 1].date,
-                              _transactions[index].date))
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: 10.0,
-                            bottom: 5.0,
-                          ),
-                          child: Text(
-                            DateFormat.yMd().format(_transactions[index].date),
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      elementTransaction(
-                        _transactions[index].title,
-                        _transactions[index].amount,
-                        _transactions[index].date,
-                        _transactions[index].isExpense,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      )
-                    ],
-                  );
-                },
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _page,
               ),
             ),
           ),
@@ -226,64 +203,15 @@ class _StartScreenState extends State<StartScreen> {
           });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'รายรับ'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.access_time), label: 'รายจ่าย'),
-        ],
-      ),
-    );
-  }
-
-  Widget elementTransaction(
-      String title, double amount, DateTime date, bool isExpense) {
-    String isExpense0;
-    if (isExpense) {
-      isExpense0 = 'รายจ่าย';
-    } else {
-      isExpense0 = 'รายรับ';
-    }
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(44, 255, 105, 180),
-        borderRadius: BorderRadius.circular(100),
-      ),
-      height: 60,
-      width: 270,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(44, 255, 105, 180),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Icon(Icons.money, size: 30),
-          ),
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(isExpense0),
-                Text(title),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                amount.toString(),
-              ),
-            ),
-          ),
-          const SizedBox(
-            width: 15,
-          ),
+              icon: ImageIcon(AssetImage('assets/images/accounting.png')),
+              label: 'Home'),
+          BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/feather (1).png')),
+              label: 'รายรับ'),
+          BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/bankruptcy.png')),
+              label: 'รายจ่าย'),
         ],
       ),
     );
