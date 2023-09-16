@@ -32,4 +32,30 @@ class TransactionFirestoreService {
             .map((doc) => Transactions.fromJson(doc.data()))
             .toList());
   }
+
+  Stream<List<Transactions>> getIncomeTransactionsByUser() {
+    return _firestore
+        .collection('users')
+        .doc(_user.uid)
+        .collection('transactions')
+        .where('isExpense', isEqualTo: false)
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Transactions.fromJson(doc.data()))
+            .toList());
+  }
+
+  Stream<List<Transactions>> getIsExpenseTransactionsByUser() {
+    return _firestore
+        .collection('users')
+        .doc(_user.uid)
+        .collection('transactions')
+        .where('isExpense', isEqualTo: true)
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Transactions.fromJson(doc.data()))
+            .toList());
+  }
 }

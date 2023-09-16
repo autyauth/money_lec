@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:money_lec/db/transactions_database.dart';
 import 'package:money_lec/model/transactions.dart';
 import 'package:money_lec/screens/login_screen.dart';
 import 'package:money_lec/screens/new_transaction_screen.dart';
@@ -19,7 +18,8 @@ class _StartScreenState extends State<StartScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   User user = FirebaseAuth.instance.currentUser!;
   double _totalMoney = 0;
-  DateTime? _selectedDate; // เพิ่มตัวแปรสำหรับเก็บวันที่ที่ถูกเลือก
+  //final List<Widget> _page = [AllTransactionPage(transactions: transactions),IncomePage(transactions: transactions),IsExpensePage(transactions: transactions)];
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -30,8 +30,6 @@ class _StartScreenState extends State<StartScreen> {
 
   @override
   void dispose() {
-    TransactionsDatabase.instance.close();
-
     super.dispose();
   }
 
@@ -58,6 +56,12 @@ class _StartScreenState extends State<StartScreen> {
       }
     }
     return totalMoney;
+  }
+
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   @override
@@ -128,35 +132,6 @@ class _StartScreenState extends State<StartScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  child: DropdownButton<DateTime>(
-                    value: _selectedDate,
-                    items: [
-                      DropdownMenuItem<DateTime>(
-                        value: null,
-                        child: Text('ทั้งหมด'),
-                      ),
-                      ..._transactions
-                          .map((transaction) => transaction.date)
-                          .toSet()
-                          .toList()
-                          .map(
-                            (date) => DropdownMenuItem<DateTime>(
-                              value: date,
-                              child: Text(DateFormat.yMd().format(date)),
-                            ),
-                          )
-                          .toList(),
-                    ],
-                    onChanged: (selectedDate) {
-                      setState(() {
-                        _selectedDate = selectedDate;
-                      });
-                    },
-                    hint: Text('เลือกวันที่'),
-                  ),
-                ),
               ],
             ),
           ),
@@ -172,33 +147,40 @@ class _StartScreenState extends State<StartScreen> {
                 ),
               ),
               child: ListView.builder(
-                  itemCount: _transactions.length,
-                  itemBuilder: (context, index) {
-                    final transaction = _transactions[index];
-                    if (_selectedDate == null ||
-                        transaction.date == _selectedDate) {
-                      return Column(
-                        children: [
-                          const SizedBox(
-                            height: 4.0,
+                itemCount: _transactions.length,
+                itemBuilder: (context, index) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (index == 0 ||
+                          !isSameDay(_transactions[index - 1].date,
+                              _transactions[index].date))
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 10.0,
+                            bottom: 5.0,
                           ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: elementTransaction(
-                              transaction.title,
-                              transaction.amount,
-                              transaction.date,
-                              transaction.isExpense,
+                          child: Text(
+                            DateFormat.yMd().format(_transactions[index].date),
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(
-                            height: 3.0,
-                          ),
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }),
+                        ),
+                      elementTransaction(
+                        _transactions[index].title,
+                        _transactions[index].amount,
+                        _transactions[index].date,
+                        _transactions[index].isExpense,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      )
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -237,10 +219,17 @@ class _StartScreenState extends State<StartScreen> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'test'),
-          BottomNavigationBarItem(icon: Icon(Icons.access_time), label: 'test'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'รายรับ'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.access_time), label: 'รายจ่าย'),
         ],
       ),
     );
@@ -279,16 +268,17 @@ class _StartScreenState extends State<StartScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(DateFormat.yMd().format(date)),
                 Text(isExpense0),
                 Text(title),
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              amount.toString(),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                amount.toString(),
+              ),
             ),
           ),
           const SizedBox(
@@ -297,5 +287,15 @@ class _StartScreenState extends State<StartScreen> {
         ],
       ),
     );
+  }
+
+  List<Transactions> _getIncomeTransactions() {
+    return _transactions
+        .where((transaction) => !transaction.isExpense)
+        .toList();
+  }
+
+  List<Transactions> _getExpenseTransactions() {
+    return _transactions.where((transaction) => transaction.isExpense).toList();
   }
 }
